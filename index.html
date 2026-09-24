@@ -122,7 +122,6 @@
 
         <div class="flex flex-col lg:flex-row gap-6">
             <div class="flex-1 w-full overflow-hidden">
-                <!-- 使用 grid-cols-[repeat(auto-fill,minmax(130px,1fr))] 自動換行 -->
                 <section id="cards-container" class="grid gap-4 md:gap-6 auto-rows-max" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));">
                     <!-- 卡片動態生成 -->
                 </section>
@@ -151,9 +150,9 @@
                             </button>
                         </div>
                         
-                        <div class="w-full max-w-sm border-t-2 border-milktea pt-4">
+                        <div class="w-full border-t-2 border-milktea pt-4">
                             <h4 class="font-bold text-sm text-gray-500 mb-3 flex items-center justify-center gap-1"><i class="ph-fill ph-lightning text-yellow-500"></i> 班級專屬快速評分</h4>
-                            <div id="class-quick-buttons-container" class="grid grid-cols-2 gap-2">
+                            <div id="class-quick-buttons-container" class="flex flex-wrap justify-center gap-2">
                                 <!-- 班級專屬快速按鈕動態生成 -->
                             </div>
                         </div>
@@ -426,7 +425,8 @@
 
                 <!-- 個人/小組 快速評分按鈕 -->
                 <section class="bg-white p-5 rounded-2xl border-2 border-milktea shadow-sm">
-                    <h4 class="font-bold text-lg mb-4 flex items-center gap-2 border-b pb-2"><i class="ph-fill ph-user text-yellow-500"></i> 個人 / 小組 - 快速評分設定</h4>
+                    <h4 class="font-bold text-lg mb-2 flex items-center gap-2"><i class="ph-fill ph-user text-yellow-500"></i> 個人 / 小組 - 快速評分設定</h4>
+                    <p class="text-sm text-gray-500 mb-4 border-b pb-2">這裡設定的按鈕預設會顯示在個人的「檢核表」與「班級首頁」中。點擊 <i class="ph-bold ph-eye text-blue-500"></i> 可以隱藏它在班級的顯示。</p>
                     <div class="flex flex-col md:flex-row gap-2 mb-4">
                         <input type="text" id="new-quick-reason" placeholder="完整事由 (如: 聯絡簿確實)" class="flex-1 p-2 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-bearlight">
                         <input type="text" id="new-quick-shortname" placeholder="檢核表簡稱 (如: 聯)" class="w-full md:w-32 p-2 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-bearlight text-center" maxlength="2">
@@ -439,11 +439,12 @@
 
                 <!-- 班級專屬 快速評分按鈕 -->
                 <section class="bg-white p-5 rounded-2xl border-2 border-milktea shadow-sm">
-                    <h4 class="font-bold text-lg mb-4 flex items-center gap-2 border-b pb-2"><i class="ph-fill ph-users-three text-yellow-500"></i> 班級專屬 - 快速評分設定</h4>
+                    <h4 class="font-bold text-lg mb-2 flex items-center gap-2"><i class="ph-fill ph-users-three text-yellow-500"></i> 班級專屬 - 快速評分設定</h4>
+                    <p class="text-sm text-gray-500 mb-4 border-b pb-2">虛線框的是從個人連動過來的快捷鍵，可單獨在班級隱藏。實線框為只屬於班級的大型任務。</p>
                     <div class="flex flex-col md:flex-row gap-2 mb-4">
                         <input type="text" id="new-class-quick-reason" placeholder="完整事由 (如: 全班無人遲到)" class="flex-1 p-2 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-bearlight">
                         <input type="number" id="new-class-quick-score" placeholder="分數" class="w-full md:w-24 p-2 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-bearlight text-center">
-                        <button onclick="app.addClassQuickButton()" class="px-4 py-2 bg-bearlight text-white font-bold rounded-xl hover:bg-bearbrown shadow-sm transition-colors">新增按鈕</button>
+                        <button onclick="app.addClassQuickButton()" class="px-4 py-2 bg-bearlight text-white font-bold rounded-xl hover:bg-bearbrown shadow-sm transition-colors">新增班級按鈕</button>
                     </div>
                     <div id="settings-class-quick-buttons-list" class="flex flex-wrap gap-2">
                     </div>
@@ -566,11 +567,10 @@
                 mode: 'individual', 
                 password: '0000',
                 quickButtons: [
-                    { reason: '聯絡簿確實', shortName: '聯', score: 1 },
-                    { reason: '打掃認真', shortName: '掃', score: 1 },
-                    { reason: '作業準時', shortName: '作', score: 1 }
+                    { reason: '聯絡簿確實', shortName: '聯', score: 1, hideInClass: false },
+                    { reason: '打掃認真', shortName: '掃', score: 1, hideInClass: false },
+                    { reason: '作業準時', shortName: '作', score: 1, hideInClass: false }
                 ],
-                // 新增：班級專屬快速按鈕陣列
                 classQuickButtons: [
                     { reason: '全班無人遲到', score: 2 },
                     { reason: '整潔比賽優良', score: 3 }
@@ -601,7 +601,8 @@
                         if (parsed.quickButtons) {
                             this.state.quickButtons = parsed.quickButtons.map(btn => ({
                                 ...btn,
-                                shortName: btn.shortName || btn.reason.substring(0, 1)
+                                shortName: btn.shortName || btn.reason.substring(0, 1),
+                                hideInClass: btn.hideInClass || false
                             }));
                         }
                         if (parsed.classQuickButtons) {
@@ -696,10 +697,11 @@
 
                 const now = new Date();
                 const currentMonthStr = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, '0')}`;
-
                 const months = new Set();
+                
                 historyRecords.forEach(r => {
                     const match = r.date.match(/^(\d{4}\/\d{2})/);
+                    // 排除當下月份，因為已經有「本月」這個選項了
                     if (match && match[1] !== currentMonthStr) {
                         months.add(match[1]);
                     }
@@ -827,8 +829,9 @@
                 if (classQuickContainer) {
                     classQuickContainer.innerHTML = '';
                     
-                    // 合併「個人/小組」與「班級專屬」的快速按鈕，讓班級頁面可以共用所有的快捷鍵
-                    const allQuickButtons = [...this.state.quickButtons, ...(this.state.classQuickButtons || [])];
+                    // 合併「沒被隱藏的個人/小組按鈕」與「班級專屬按鈕」
+                    const activePersonalBtns = this.state.quickButtons.filter(b => !b.hideInClass);
+                    const allQuickButtons = [...activePersonalBtns, ...(this.state.classQuickButtons || [])];
                     
                     allQuickButtons.forEach(btn => {
                         const isPositive = btn.score > 0;
@@ -1076,7 +1079,7 @@
                             ${student.number} 號
                         </div>
                         <img src='${student.avatar || DEFAULT_BEAR_SVG}' class="w-20 h-20 rounded-2xl border-4 border-accent shadow-sm mb-3 object-cover mt-6">
-                        <h3 class="text-lg font-extrabold text-bearbrown break-words text-center px-1 leading-tight">${student.name}</h3>
+                        <h3 class="text-lg font-extrabold text-bearbrown text-center px-1 leading-tight break-words">${student.name}</h3>
                         <p class="text-xs text-gray-500 mt-1 mb-3">${groupName}</p>
                         <div class="mt-auto w-full bg-oatmeal rounded-xl py-2 text-center border border-gray-100 shadow-inner">
                             <span class="text-2xl font-black text-bearlight">${student.score}</span>
@@ -1536,11 +1539,13 @@
                 const section = document.getElementById('daily-grid-section');
                 if (this.state.mode !== 'individual' || this.state.students.length === 0) return;
 
+                // 產生今日日期字串
                 const d = new Date();
                 const y = d.getFullYear();
                 const m = String(d.getMonth() + 1).padStart(2, '0');
                 const day = String(d.getDate()).padStart(2, '0');
                 const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+                
                 const dateSpan = document.getElementById('daily-grid-date');
                 if (dateSpan) dateSpan.innerText = `[${y}/${m}/${day} (${weekdays[d.getDay()]})]`;
 
@@ -1556,6 +1561,7 @@
                     headersHtml += `<th class="py-3 px-1 text-center text-sm whitespace-nowrap text-gray-500 w-10 min-w-[40px]" title="${btn.reason}">${shortName}</th>`;
                 });
                 
+                // 隱形佔位符欄位，吸收多餘空間，防止排版被拉寬
                 headersHtml += `<th class="w-full"></th></tr>`;
                 head.innerHTML = headersHtml;
 
@@ -1589,7 +1595,7 @@
                 this.renderSettingsStudentForm();
                 this.renderSettingsStudentList();
                 this.renderSettingsQuickButtons();
-                this.renderSettingsClassQuickButtons(); // 渲染班級專屬按鈕
+                this.renderSettingsClassQuickButtons(); 
                 document.getElementById('new-password').value = '';
                 this.openModal('settings');
             },
@@ -1725,11 +1731,18 @@
                     const colorClass = isPositive ? 'bg-green-100 text-green-800 border-green-300' : 'bg-red-100 text-red-800 border-red-300';
                     const sign = isPositive ? '+' : '';
                     const shortLabel = btn.shortName ? `[${btn.shortName}] ` : '';
+                    const isHidden = btn.hideInClass;
+
+                    // 切換是否在班級顯示的圖示
+                    const toggleIcon = isHidden ?
+                        `<button onclick="app.toggleClassVisibility(${index}, false)" class="text-gray-400 hover:text-blue-500 ml-2" title="目前在班級隱藏，點擊恢復顯示"><i class="ph-bold ph-eye-slash text-lg"></i></button>` :
+                        `<button onclick="app.toggleClassVisibility(${index}, true)" class="text-blue-500 hover:text-gray-400 ml-2" title="目前在班級顯示，點擊可隱藏"><i class="ph-bold ph-eye text-lg"></i></button>`;
                     
                     container.innerHTML += `
-                        <div class="flex items-center gap-2 ${colorClass} px-3 py-2 rounded-xl border shadow-sm">
-                            <span class="font-bold text-sm">${shortLabel}${btn.reason} (${sign}${btn.score})</span>
-                            <button onclick="app.deleteQuickButton(${index})" class="text-gray-500 hover:text-red-700 ml-1"><i class="ph-bold ph-x"></i></button>
+                        <div class="flex items-center gap-1 ${colorClass} px-3 py-2 rounded-xl border shadow-sm ${isHidden ? 'opacity-50' : ''}">
+                            <span class="font-bold text-sm pr-1">${shortLabel}${btn.reason} (${sign}${btn.score})</span>
+                            ${toggleIcon}
+                            <button onclick="app.deleteQuickButton(${index})" class="text-gray-500 hover:text-red-700 ml-1"><i class="ph-bold ph-x text-lg"></i></button>
                         </div>
                     `;
                 });
@@ -1744,7 +1757,7 @@
                 if (!reason) return this.showToast('請輸入事由', true);
                 if (isNaN(score) || score === 0) return this.showToast('請輸入有效分數', true);
 
-                this.state.quickButtons.push({ reason, shortName, score });
+                this.state.quickButtons.push({ reason, shortName, score, hideInClass: false });
                 this.saveData();
                 
                 document.getElementById('new-quick-reason').value = '';
@@ -1752,6 +1765,7 @@
                 document.getElementById('new-quick-score').value = '';
                 
                 this.renderSettingsQuickButtons();
+                this.renderSettingsClassQuickButtons();
                 this.render();
                 this.showToast('個人快速按鈕新增成功');
             },
@@ -1760,24 +1774,55 @@
                 this.state.quickButtons.splice(index, 1);
                 this.saveData();
                 this.renderSettingsQuickButtons();
+                this.renderSettingsClassQuickButtons();
                 this.render();
                 this.showToast('個人快速按鈕已移除');
             },
 
-            // --- 新增：班級專屬快速按鈕管理 ---
+            toggleClassVisibility(index, hide) {
+                if (this.state.quickButtons[index]) {
+                    this.state.quickButtons[index].hideInClass = hide;
+                    this.saveData();
+                    this.renderSettingsQuickButtons();
+                    this.renderSettingsClassQuickButtons();
+                    this.render();
+                    this.showToast(hide ? '已在班級頁面隱藏該按鈕' : '已恢復顯示在班級頁面');
+                }
+            },
+
             renderSettingsClassQuickButtons() {
                 const container = document.getElementById('settings-class-quick-buttons-list');
                 container.innerHTML = '';
                 
+                // 1. 渲染沒有被隱藏的個人連動按鈕
+                this.state.quickButtons.forEach((btn, index) => {
+                    if (btn.hideInClass) return; // 略過已隱藏的
+
+                    const isPositive = btn.score > 0;
+                    const colorClass = isPositive ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200';
+                    const sign = isPositive ? '+' : '';
+                    
+                    container.innerHTML += `
+                        <div class="flex items-center gap-2 ${colorClass} px-3 py-2 rounded-xl border-2 border-dashed shadow-sm relative group cursor-help" title="這是連動的個人按鈕，刪除只會在班級隱藏">
+                            <div class="absolute -top-2 -left-2 bg-white rounded-full border border-gray-200 p-0.5 shadow-sm text-gray-400">
+                                <i class="ph-bold ph-link text-[10px]"></i>
+                            </div>
+                            <span class="font-bold text-sm">${btn.reason} (${sign}${btn.score})</span>
+                            <button onclick="app.toggleClassVisibility(${index}, true)" class="text-gray-400 hover:text-red-500 ml-1" title="在班級頁面隱藏此按鈕"><i class="ph-bold ph-x text-lg"></i></button>
+                        </div>
+                    `;
+                });
+
+                // 2. 渲染班級專屬大按鈕
                 (this.state.classQuickButtons || []).forEach((btn, index) => {
                     const isPositive = btn.score > 0;
-                    const colorClass = isPositive ? 'bg-green-100 text-green-800 border-green-300' : 'bg-red-100 text-red-800 border-red-300';
+                    const colorClass = isPositive ? 'bg-green-100 text-green-800 border-green-400' : 'bg-red-100 text-red-800 border-red-400';
                     const sign = isPositive ? '+' : '';
                     
                     container.innerHTML += `
                         <div class="flex items-center gap-2 ${colorClass} px-3 py-2 rounded-xl border shadow-sm">
                             <span class="font-bold text-sm">${btn.reason} (${sign}${btn.score})</span>
-                            <button onclick="app.deleteClassQuickButton(${index})" class="text-gray-500 hover:text-red-700 ml-1"><i class="ph-bold ph-x"></i></button>
+                            <button onclick="app.deleteClassQuickButton(${index})" class="text-gray-500 hover:text-red-700 ml-1"><i class="ph-bold ph-x text-lg"></i></button>
                         </div>
                     `;
                 });
@@ -1985,6 +2030,11 @@
                             if(parsed.password) this.state.password = parsed.password;
                             if(parsed.quickButtons) this.state.quickButtons = parsed.quickButtons;
                             if(parsed.classQuickButtons) this.state.classQuickButtons = parsed.classQuickButtons;
+                            
+                            // 確保隱藏標記存在
+                            this.state.quickButtons.forEach(b => {
+                                if (b.hideInClass === undefined) b.hideInClass = false;
+                            });
                             
                             this.saveData();
                             this.showToast('備份資料還原成功！');
