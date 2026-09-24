@@ -59,19 +59,16 @@
             background: theme('colors.bearlight'); 
         }
 
-        /* 隱藏預設的檔案上傳按鈕樣式 */
         input[type="file"]::file-selector-button {
             display: none;
         }
 
-        /* 模態框動畫 */
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         
         .modal-overlay { animation: fadeIn 0.2s ease-out; }
         .modal-content { animation: slideUp 0.3s ease-out; }
 
-        /* 卡片懸浮動畫 */
         .hover-card {
             transition: all 0.2s ease;
         }
@@ -84,7 +81,6 @@
 <body class="min-h-screen font-sans">
     <div class="max-w-6xl mx-auto p-4 md:p-8">
         
-        <!-- 頂部導航列 -->
         <header class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 bg-white p-4 rounded-3xl shadow-sm border-2 border-milktea">
             <div class="flex items-center gap-3">
                 <i class="ph-fill ph-paw-print text-4xl text-bearlight"></i>
@@ -92,7 +88,6 @@
             </div>
             
             <div class="flex flex-wrap items-center justify-center gap-3">
-                <!-- 模式切換按鈕 -->
                 <div class="bg-oatmeal p-1 rounded-2xl flex border-2 border-milktea relative">
                     <button id="btn-mode-individual" class="px-3 md:px-4 py-2 rounded-xl font-bold transition-all text-white bg-bearlight shadow-md text-sm md:text-base" onclick="app.setMode('individual')">
                         <i class="ph-bold ph-user mr-1"></i> 個人
@@ -105,39 +100,33 @@
                     </button>
                 </div>
                 
-                <!-- 批次任務按鈕 -->
                 <button onclick="app.requireAuth(() => app.openBatchModal())" class="px-4 py-2 bg-green-50 text-green-700 border-2 border-green-200 rounded-xl font-bold hover:bg-green-100 transition-colors shadow-sm flex items-center gap-1 text-sm md:text-base">
                     <i class="ph-bold ph-list-checks text-xl"></i> 批次評分
                 </button>
                 
-                <!-- 設定按鈕 -->
                 <button onclick="app.requireAuth(() => app.openSettings())" class="p-3 bg-accent text-bearbrown rounded-2xl font-bold hover:bg-milktea transition-colors shadow-sm">
                     <i class="ph-bold ph-gear text-xl"></i>
                 </button>
             </div>
         </header>
 
-        <!-- 排行榜區塊 -->
         <section class="bg-white p-6 rounded-3xl shadow-sm border-2 border-milktea mb-8">
             <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
                 <i class="ph-fill ph-trophy text-yellow-500 text-2xl"></i> 
                 <span id="ranking-title">榮譽排行榜 (個人)</span>
             </h2>
             <div id="chart-container" class="flex items-end gap-2 md:gap-4 h-48 overflow-x-auto pb-2 px-2">
-                <!-- 長條圖將由 JS 動態生成 -->
+                <!-- 長條圖動態生成 -->
             </div>
         </section>
 
         <div class="flex flex-col lg:flex-row gap-6">
-            
-            <!-- 左側卡片區 -->
             <div class="flex-1 w-full overflow-hidden">
-                <!-- 修正點：使用 grid-cols-[repeat(auto-fill,minmax(130px,1fr))] 自動換行，保持卡片寬度不被擠壓 -->
+                <!-- 使用 grid-cols-[repeat(auto-fill,minmax(130px,1fr))] 自動換行 -->
                 <section id="cards-container" class="grid gap-4 md:gap-6 auto-rows-max" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));">
-                    <!-- 卡片將由 JS 動態生成 -->
+                    <!-- 卡片動態生成 -->
                 </section>
                 
-                <!-- 空狀態提示 -->
                 <div id="empty-state" class="hidden text-center py-16">
                     <i class="ph-fill ph-bear-profile text-6xl text-milktea mb-4 inline-block"></i>
                     <h3 class="text-2xl font-bold text-bearbrown mb-2">還沒有任何學生資料喔！</h3>
@@ -147,9 +136,7 @@
                     </button>
                 </div>
 
-                <!-- 班級模式專屬畫面 (蜂蜜存錢筒) -->
                 <section id="class-mode-container" class="hidden flex-col xl:flex-row gap-6 w-full">
-                    <!-- 左側：存錢筒與快捷按鈕 -->
                     <div class="flex-1 bg-white p-6 md:p-8 rounded-3xl shadow-sm border-2 border-milktea flex flex-col items-center justify-center text-center">
                         <i class="ph-fill ph-jar text-8xl text-yellow-500 mb-2 drop-shadow-md"></i>
                         <span class="text-sm font-bold text-gray-400 mb-1">班級共同蜂蜜存錢筒</span>
@@ -164,21 +151,19 @@
                             </button>
                         </div>
                         
-                        <!-- 班級快速按鈕區 -->
                         <div class="w-full max-w-sm border-t-2 border-milktea pt-4">
-                            <h4 class="font-bold text-sm text-gray-500 mb-3 flex items-center justify-center gap-1"><i class="ph-fill ph-lightning text-yellow-500"></i> 快速班級評分</h4>
+                            <h4 class="font-bold text-sm text-gray-500 mb-3 flex items-center justify-center gap-1"><i class="ph-fill ph-lightning text-yellow-500"></i> 班級專屬快速評分</h4>
                             <div id="class-quick-buttons-container" class="grid grid-cols-2 gap-2">
-                                <!-- JS 動態生成快速按鈕 -->
+                                <!-- 班級專屬快速按鈕動態生成 -->
                             </div>
                         </div>
                     </div>
-                    <!-- 右側：班級存摺 -->
+                    
                     <div class="flex-1 bg-white p-5 md:p-6 rounded-3xl shadow-sm border-2 border-milktea flex flex-col min-h-[400px] h-full">
                         <div class="flex justify-between items-center mb-4 flex-wrap gap-2">
                             <h3 class="text-xl font-bold flex items-center gap-2 text-bearbrown"><i class="ph-fill ph-book-open-text text-bearlight"></i> 班級共同存摺</h3>
                             <div class="flex gap-2">
                                 <select id="class-history-filter" class="p-1 border border-gray-200 bg-white rounded-lg text-sm focus:outline-none" onchange="app.renderClassHistory()">
-                                    <!-- 動態生成選項 -->
                                 </select>
                                 <button onclick="app.exportClassHistory()" class="px-3 py-1 bg-bearlight text-white rounded-lg text-sm font-bold hover:bg-bearbrown transition-colors shadow-sm flex items-center gap-1">
                                     <i class="ph-bold ph-download-simple"></i> 匯出
@@ -187,26 +172,22 @@
                         </div>
                         <div class="flex-1 overflow-y-auto bg-oatmeal/30 rounded-2xl border border-gray-100 p-3 shadow-inner">
                             <ul id="class-history-list" class="space-y-3">
-                                <!-- JS 動態生成班級紀錄 -->
                             </ul>
                         </div>
                     </div>
                 </section>
             </div>
 
-            <!-- 右側今日檢核表 (個人模式下顯示) -->
             <section id="daily-grid-section" class="flex flex-col w-full lg:w-[480px] xl:w-[520px] shrink-0 bg-white p-4 md:p-5 rounded-3xl shadow-sm border-2 border-milktea h-fit">
                 <h2 class="text-lg font-bold mb-4 flex items-center gap-2 text-bearbrown">
                     <i class="ph-fill ph-calendar-check text-success text-2xl"></i> 今日任務檢核表
-                    <span id="daily-grid-date" class="text-sm text-gray-500 font-normal ml-1"></span>
+                    <span id="daily-grid-date" class="text-sm text-gray-400 font-normal ml-1"></span>
                 </h2>
                 <div class="w-full bg-oatmeal/30 rounded-2xl border border-gray-100 p-2 relative shadow-inner overflow-x-auto">
                     <table class="w-full text-left border-collapse text-sm">
                         <thead id="daily-grid-head" class="text-gray-500 border-b-2 border-milktea sticky top-0 bg-oatmeal/90 backdrop-blur-sm z-10 whitespace-nowrap">
-                            <!-- JS 生成表頭 -->
                         </thead>
                         <tbody id="daily-grid-body" class="text-bearbrown divide-y divide-gray-200">
-                            <!-- JS 生成內容 -->
                         </tbody>
                     </table>
                 </div>
@@ -233,7 +214,6 @@
     <!-- 學生操作模態框 -->
     <div id="modal-student" class="fixed inset-0 bg-bearbrown/40 backdrop-blur-sm hidden items-center justify-center z-40 modal-overlay p-4">
         <div class="bg-white rounded-3xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col modal-content border-4 border-milktea">
-            <!-- Header -->
             <div class="bg-accent p-4 flex justify-between items-center border-b-2 border-milktea">
                 <h3 class="text-xl font-bold flex items-center gap-2"><i class="ph-fill ph-student text-2xl text-bearlight"></i> 學生資料與評分</h3>
                 <div class="flex items-center gap-3">
@@ -245,7 +225,6 @@
             </div>
             
             <div class="flex flex-col md:flex-row flex-1 overflow-y-auto">
-                <!-- 左側：個人資料 -->
                 <div class="w-full md:w-1/3 p-4 md:p-6 border-b-2 md:border-b-0 md:border-r-2 border-milktea bg-oatmeal/50 flex flex-col items-center">
                     <div id="student-modal-avatar-wrapper" class="relative mb-4 group" onclick="if(app.state.isStudentEditUnlocked) document.getElementById('upload-avatar').click()">
                         <img id="student-modal-avatar" src="" class="w-36 h-36 rounded-3xl border-4 border-white shadow-md object-cover bg-accent">
@@ -263,28 +242,22 @@
                     <div class="w-full">
                         <label class="block text-sm font-bold text-gray-600 mb-1">所屬組別</label>
                         <select id="student-modal-group" class="w-full p-2 border-2 border-milktea rounded-xl focus:outline-none focus:border-bearlight bg-white" onchange="app.changeStudentGroup(this.value)" disabled>
-                            <!-- 選項由 JS 生成 -->
                         </select>
                         
-                        <!-- 刪除學生按鈕 (解鎖編輯後才會顯示) -->
                         <button id="btn-delete-student" onclick="app.confirmDeleteStudent()" class="w-full mt-6 py-3 bg-red-50 text-red-600 border-2 border-red-200 rounded-xl font-bold hover:bg-red-100 transition-colors shadow-sm hidden items-center justify-center gap-2">
                             <i class="ph-bold ph-trash text-xl"></i> 刪除此學生
                         </button>
                     </div>
                 </div>
 
-                <!-- 右側：評分與紀錄 -->
                 <div class="w-full md:w-2/3 p-4 md:p-6 flex flex-col gap-6">
                     <div id="student-edit-controls" class="space-y-6 hidden">
-                        <!-- 快速評分區 -->
                         <div>
                             <h4 class="font-bold mb-3 flex items-center gap-2"><i class="ph-fill ph-lightning text-yellow-500"></i> 快速評分</h4>
                             <div id="quick-buttons-container" class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                                <!-- 按鈕由 JS 動態生成 -->
                             </div>
                         </div>
 
-                        <!-- 自訂評分區 -->
                         <div class="bg-white p-4 rounded-2xl border-2 border-milktea shadow-sm">
                             <h4 class="font-bold mb-3">自訂加扣分事由</h4>
                             <div class="flex flex-col sm:flex-row gap-2">
@@ -297,13 +270,11 @@
                         </div>
                     </div>
 
-                    <!-- 歷史紀錄 -->
                     <div class="flex-1 flex flex-col min-h-[200px]">
                         <div class="flex justify-between items-center mb-3 flex-wrap gap-2">
                             <h4 class="font-bold flex items-center gap-2"><i class="ph-fill ph-clock-counter-clockwise text-bearlight"></i> 歷史明細</h4>
                             <div class="flex gap-2">
                                 <select id="history-filter" class="p-1 border border-gray-200 bg-white rounded-lg text-sm focus:outline-none" onchange="app.renderHistory()">
-                                    <!-- 動態生成選項 -->
                                 </select>
                                 <button onclick="app.exportStudentHistory()" class="px-3 py-1 bg-bearlight text-white rounded-lg text-sm font-bold hover:bg-bearbrown transition-colors shadow-sm flex items-center gap-1">
                                     <i class="ph-bold ph-download-simple"></i> 匯出
@@ -312,7 +283,6 @@
                         </div>
                         <div class="flex-1 overflow-y-auto bg-oatmeal/30 rounded-2xl border border-gray-100 p-2 shadow-inner">
                             <ul id="student-history-list" class="space-y-2">
-                                <!-- 紀錄由 JS 生成 -->
                             </ul>
                         </div>
                     </div>
@@ -353,14 +323,12 @@
                 <h3 class="text-xl font-bold flex items-center gap-2"><i class="ph-fill ph-users-three text-2xl text-bearlight"></i> 小組共同評分</h3>
                 <button onclick="app.closeModal('group')" class="text-bearbrown hover:text-red-500 transition-colors"><i class="ph-bold ph-x text-2xl"></i></button>
             </div>
-            
             <div class="p-6">
                 <div class="text-center mb-6">
                     <h2 id="group-modal-name" class="text-2xl font-extrabold text-bearbrown mb-2"></h2>
                     <p class="text-sm text-gray-500">此操作將會平均/同步套用到以下組員：</p>
                     <div id="group-modal-members" class="mt-2 flex flex-wrap justify-center gap-1 text-sm font-bold text-bearlight"></div>
                 </div>
-
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-bold text-gray-600 mb-1">事由</label>
@@ -377,6 +345,36 @@
         </div>
     </div>
 
+    <!-- 刪除單一學生確認模態框 -->
+    <div id="modal-delete-student" class="fixed inset-0 bg-bearbrown/40 backdrop-blur-sm hidden items-center justify-center z-50 modal-overlay p-4">
+        <div class="bg-white p-6 md:p-8 rounded-3xl shadow-xl border-4 border-red-200 max-w-sm w-full modal-content text-center">
+            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="ph-bold ph-warning-circle text-3xl text-red-500"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2 text-bearbrown">確定要刪除這位學生嗎？</h3>
+            <p class="text-sm text-gray-500 mb-6">這個動作無法復原，該學生的所有歷史紀錄也會一併消失喔！</p>
+            <div class="flex gap-3">
+                <button onclick="app.closeModal('delete-student')" class="flex-1 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition-colors">取消</button>
+                <button onclick="app.executeDeleteStudent()" class="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 shadow-sm transition-colors">確定刪除</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 刪除所有學生確認模態框 -->
+    <div id="modal-clear-students" class="fixed inset-0 bg-bearbrown/40 backdrop-blur-sm hidden items-center justify-center z-50 modal-overlay p-4">
+        <div class="bg-white p-6 md:p-8 rounded-3xl shadow-xl border-4 border-red-200 max-w-sm w-full modal-content text-center">
+            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="ph-bold ph-warning-circle text-3xl text-red-500"></i>
+            </div>
+            <h3 class="text-xl font-bold mb-2 text-bearbrown">確定要清空所有學生嗎？</h3>
+            <p class="text-sm text-gray-500 mb-6">此動作將會刪除「所有學生名單與他們的成績紀錄」，但會保留組別與按鈕設定。無法復原！</p>
+            <div class="flex gap-3">
+                <button onclick="app.closeModal('clear-students')" class="flex-1 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition-colors">取消</button>
+                <button onclick="app.executeClearAllStudents()" class="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 shadow-sm transition-colors">確定全刪</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 設定模態框 (大後台) -->
     <div id="modal-settings" class="fixed inset-0 bg-bearbrown/40 backdrop-blur-sm hidden items-center justify-center z-40 modal-overlay p-4">
         <div class="bg-white rounded-3xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col modal-content border-4 border-milktea">
@@ -386,7 +384,6 @@
             </div>
             
             <div class="flex-1 overflow-y-auto p-6 space-y-8 bg-oatmeal/30">
-                <!-- 系統標題設定 -->
                 <section class="bg-white p-5 rounded-2xl border-2 border-milktea shadow-sm">
                     <h4 class="font-bold text-lg mb-4 flex items-center gap-2 border-b pb-2"><i class="ph-fill ph-text-aa text-bearlight"></i> 系統標題設定</h4>
                     <div class="flex gap-2">
@@ -395,7 +392,6 @@
                     </div>
                 </section>
 
-                <!-- 學生名單管理 -->
                 <section class="bg-white p-5 rounded-2xl border-2 border-milktea shadow-sm">
                     <div class="flex justify-between items-center border-b pb-2 mb-4 flex-wrap gap-2">
                         <h4 class="font-bold text-lg flex items-center gap-2"><i class="ph-fill ph-users text-bearlight"></i> 學生名單管理</h4>
@@ -404,24 +400,20 @@
                         </button>
                     </div>
                     <div id="settings-student-list" class="max-h-64 overflow-y-auto space-y-2 pr-2">
-                        <!-- JS 生成學生名單 -->
                     </div>
                 </section>
 
-                <!-- 單筆新增學生 -->
                 <section class="bg-white p-5 rounded-2xl border-2 border-milktea shadow-sm">
                     <h4 class="font-bold text-lg mb-4 flex items-center gap-2 border-b pb-2"><i class="ph-fill ph-student text-bearlight"></i> 單筆新增學生</h4>
                     <div class="flex flex-col md:flex-row gap-2">
                         <input type="text" id="new-student-number" placeholder="座號 (如: 1)" class="w-full md:w-24 p-2 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-bearlight text-center">
                         <input type="text" id="new-student-name" placeholder="姓名" class="flex-1 p-2 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-bearlight">
                         <select id="new-student-group" class="w-full md:w-auto p-2 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-bearlight bg-white">
-                            <!-- 選項由 JS 生成 -->
                         </select>
                         <button onclick="app.addStudent()" class="px-4 py-2 bg-bearlight text-white font-bold rounded-xl hover:bg-bearbrown shadow-sm transition-colors">新增</button>
                     </div>
                 </section>
 
-                <!-- 組別管理 -->
                 <section class="bg-white p-5 rounded-2xl border-2 border-milktea shadow-sm">
                     <h4 class="font-bold text-lg mb-4 flex items-center gap-2 border-b pb-2"><i class="ph-fill ph-squares-four text-bearlight"></i> 組別管理</h4>
                     <div class="flex gap-2 mb-4">
@@ -429,13 +421,12 @@
                         <button onclick="app.addGroup()" class="px-4 py-2 bg-bearlight text-white font-bold rounded-xl hover:bg-bearbrown">新增</button>
                     </div>
                     <div id="settings-group-list" class="flex flex-wrap gap-2">
-                        <!-- 組別標籤由 JS 生成 -->
                     </div>
                 </section>
 
-                <!-- 快速評分按鈕管理 -->
+                <!-- 個人/小組 快速評分按鈕 -->
                 <section class="bg-white p-5 rounded-2xl border-2 border-milktea shadow-sm">
-                    <h4 class="font-bold text-lg mb-4 flex items-center gap-2 border-b pb-2"><i class="ph-fill ph-lightning text-yellow-500"></i> 快速評分按鈕設定</h4>
+                    <h4 class="font-bold text-lg mb-4 flex items-center gap-2 border-b pb-2"><i class="ph-fill ph-user text-yellow-500"></i> 個人 / 小組 - 快速評分設定</h4>
                     <div class="flex flex-col md:flex-row gap-2 mb-4">
                         <input type="text" id="new-quick-reason" placeholder="完整事由 (如: 聯絡簿確實)" class="flex-1 p-2 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-bearlight">
                         <input type="text" id="new-quick-shortname" placeholder="檢核表簡稱 (如: 聯)" class="w-full md:w-32 p-2 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-bearlight text-center" maxlength="2">
@@ -443,11 +434,21 @@
                         <button onclick="app.addQuickButton()" class="px-4 py-2 bg-bearlight text-white font-bold rounded-xl hover:bg-bearbrown shadow-sm transition-colors">新增按鈕</button>
                     </div>
                     <div id="settings-quick-buttons-list" class="flex flex-wrap gap-2">
-                        <!-- 快速按鈕標籤由 JS 生成 -->
                     </div>
                 </section>
 
-                <!-- 資料管理 (匯入/匯出) -->
+                <!-- 班級專屬 快速評分按鈕 -->
+                <section class="bg-white p-5 rounded-2xl border-2 border-milktea shadow-sm">
+                    <h4 class="font-bold text-lg mb-4 flex items-center gap-2 border-b pb-2"><i class="ph-fill ph-users-three text-yellow-500"></i> 班級專屬 - 快速評分設定</h4>
+                    <div class="flex flex-col md:flex-row gap-2 mb-4">
+                        <input type="text" id="new-class-quick-reason" placeholder="完整事由 (如: 全班無人遲到)" class="flex-1 p-2 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-bearlight">
+                        <input type="number" id="new-class-quick-score" placeholder="分數" class="w-full md:w-24 p-2 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-bearlight text-center">
+                        <button onclick="app.addClassQuickButton()" class="px-4 py-2 bg-bearlight text-white font-bold rounded-xl hover:bg-bearbrown shadow-sm transition-colors">新增按鈕</button>
+                    </div>
+                    <div id="settings-class-quick-buttons-list" class="flex flex-wrap gap-2">
+                    </div>
+                </section>
+
                 <section class="bg-white p-5 rounded-2xl border-2 border-milktea shadow-sm">
                     <h4 class="font-bold text-lg mb-4 flex items-center gap-2 border-b pb-2"><i class="ph-fill ph-database text-bearlight"></i> 資料管理</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -474,7 +475,6 @@
                     </div>
                 </section>
                 
-                <!-- 密碼修改 -->
                 <section class="bg-white p-5 rounded-2xl border-2 border-milktea shadow-sm">
                     <h4 class="font-bold text-lg mb-4 flex items-center gap-2 border-b pb-2"><i class="ph-fill ph-lock-key text-bearlight"></i> 修改密碼</h4>
                     <div class="flex gap-2">
@@ -482,36 +482,6 @@
                         <button onclick="app.changePassword()" class="px-4 py-2 bg-gray-800 text-white font-bold rounded-xl hover:bg-black">更新密碼</button>
                     </div>
                 </section>
-            </div>
-        </div>
-    </div>
-
-    <!-- 刪除單一學生確認模態框 -->
-    <div id="modal-delete-student" class="fixed inset-0 bg-bearbrown/40 backdrop-blur-sm hidden items-center justify-center z-50 modal-overlay p-4">
-        <div class="bg-white p-6 md:p-8 rounded-3xl shadow-xl border-4 border-red-200 max-w-sm w-full modal-content text-center">
-            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="ph-bold ph-warning-circle text-3xl text-red-500"></i>
-            </div>
-            <h3 class="text-xl font-bold mb-2 text-bearbrown">確定要刪除這位學生嗎？</h3>
-            <p class="text-sm text-gray-500 mb-6">這個動作無法復原，該學生的所有歷史紀錄也會一併消失喔！</p>
-            <div class="flex gap-3">
-                <button onclick="app.closeModal('delete-student')" class="flex-1 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition-colors">取消</button>
-                <button onclick="app.executeDeleteStudent()" class="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 shadow-sm transition-colors">確定刪除</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 刪除所有學生確認模態框 (大後台) -->
-    <div id="modal-clear-students" class="fixed inset-0 bg-bearbrown/40 backdrop-blur-sm hidden items-center justify-center z-50 modal-overlay p-4">
-        <div class="bg-white p-6 md:p-8 rounded-3xl shadow-xl border-4 border-red-200 max-w-sm w-full modal-content text-center">
-            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="ph-bold ph-warning-circle text-3xl text-red-500"></i>
-            </div>
-            <h3 class="text-xl font-bold mb-2 text-bearbrown">確定要清空所有學生嗎？</h3>
-            <p class="text-sm text-gray-500 mb-6">此動作將會刪除「所有學生名單與他們的成績紀錄」，但會保留組別與按鈕設定。無法復原！</p>
-            <div class="flex gap-3">
-                <button onclick="app.closeModal('clear-students')" class="flex-1 py-3 bg-gray-100 text-gray-600 rounded-xl font-bold hover:bg-gray-200 transition-colors">取消</button>
-                <button onclick="app.executeClearAllStudents()" class="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 shadow-sm transition-colors">確定全刪</button>
             </div>
         </div>
     </div>
@@ -529,7 +499,6 @@
                     <div class="w-full sm:w-auto flex items-center gap-2">
                         <label class="font-bold text-bearbrown whitespace-nowrap">選擇任務：</label>
                         <select id="batch-task-select" onchange="app.renderBatchStudents()" class="w-full sm:w-64 p-2 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-bearlight bg-white font-bold text-bearbrown">
-                            <!-- JS 生成 -->
                         </select>
                     </div>
                     
@@ -545,7 +514,6 @@
                         <i class="ph-fill ph-info"></i> 預設自動勾選「未評分」的學生。綠底 <i class="ph-fill ph-check-circle text-green-500"></i> 代表將獲得分數。
                     </p>
                     <div id="batch-students-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                        <!-- JS 動態生成學生按鈕 -->
                     </div>
                 </div>
             </div>
@@ -587,7 +555,6 @@
     </div>
 
     <script>
-        // --- 預設小熊 SVG 頭像 ---
         const DEFAULT_BEAR_SVG = `data:image/svg+xml;utf8,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" fill="%23D4A373" /><circle cx="20" cy="20" r="15" fill="%23D4A373" /><circle cx="80" cy="20" r="15" fill="%23D4A373" /><circle cx="20" cy="20" r="8" fill="%23FAEDCD" /><circle cx="80" cy="20" r="8" fill="%23FAEDCD" /><ellipse cx="50" cy="60" rx="18" ry="15" fill="%23FAEDCD" /><ellipse cx="50" cy="55" rx="6" ry="4" fill="%235C4033" /><circle cx="35" cy="40" r="4" fill="%235C4033" /><circle cx="65" cy="40" r="4" fill="%235C4033" /><path d="M45,62 Q50,68 55,62" stroke="%235C4033" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
 
         const app = {
@@ -603,12 +570,17 @@
                     { reason: '打掃認真', shortName: '掃', score: 1 },
                     { reason: '作業準時', shortName: '作', score: 1 }
                 ],
+                // 新增：班級專屬快速按鈕陣列
+                classQuickButtons: [
+                    { reason: '全班無人遲到', score: 2 },
+                    { reason: '整潔比賽優良', score: 3 }
+                ],
                 authCallback: null,
                 currentStudentId: null,
                 currentGroupId: null,
                 isStudentEditUnlocked: false,
                 currentEditRecordIndex: null,
-                targetDeleteStudentId: null // 用於暫存準備刪除的學生ID
+                targetDeleteStudentId: null
             },
 
             init() {
@@ -632,6 +604,9 @@
                                 shortName: btn.shortName || btn.reason.substring(0, 1)
                             }));
                         }
+                        if (parsed.classQuickButtons) {
+                            this.state.classQuickButtons = parsed.classQuickButtons;
+                        }
                     } catch (e) {
                         this.showToast('讀取資料錯誤');
                     }
@@ -645,7 +620,8 @@
                     groups: this.state.groups,
                     classData: this.state.classData,
                     password: this.state.password,
-                    quickButtons: this.state.quickButtons
+                    quickButtons: this.state.quickButtons,
+                    classQuickButtons: this.state.classQuickButtons
                 };
                 localStorage.setItem('oatmealBearData', JSON.stringify(dataToSave));
             },
@@ -663,7 +639,6 @@
                 }, 3000);
             },
 
-            // 加入星期標示的格式化時間
             formatDateTime() {
                 const d = new Date();
                 const y = d.getFullYear();
@@ -684,7 +659,6 @@
                 return `${y}/${m}/${day}`;
             },
 
-            // --- 過濾器：加入本月、本週、並排除自動感應的本月 ---
             filterRecords(records, filterType) {
                 if (!records) return [];
                 const now = new Date();
@@ -846,14 +820,17 @@
                 }
             },
 
-            // --- 班級模式功能 ---
             renderClassMode() {
                 document.getElementById('class-total-score').innerText = this.state.classData.score;
                 
                 const classQuickContainer = document.getElementById('class-quick-buttons-container');
                 if (classQuickContainer) {
                     classQuickContainer.innerHTML = '';
-                    this.state.quickButtons.forEach(btn => {
+                    
+                    // 合併「個人/小組」與「班級專屬」的快速按鈕，讓班級頁面可以共用所有的快捷鍵
+                    const allQuickButtons = [...this.state.quickButtons, ...(this.state.classQuickButtons || [])];
+                    
+                    allQuickButtons.forEach(btn => {
                         const isPositive = btn.score > 0;
                         const colorClass = isPositive 
                             ? 'bg-green-50 border-green-200 text-green-700 hover:bg-green-100' 
@@ -1094,7 +1071,6 @@
                     card.className = "bg-white p-4 rounded-3xl shadow-sm border-2 border-milktea hover-card cursor-pointer flex flex-col items-center relative overflow-hidden";
                     card.onclick = () => this.openStudentPanel(student.id);
 
-                    // 移除了截斷限制 truncate，並加入 break-words 和 text-center
                     card.innerHTML = `
                         <div class="absolute top-2 left-2 bg-accent text-bearbrown text-xs font-bold px-2 py-1 rounded-lg shadow-sm">
                             ${student.number} 號
@@ -1232,7 +1208,6 @@
             changeStudentName(newName) {
                 const trimmedName = newName.trim();
                 const student = this.state.students.find(s => s.id === this.state.currentStudentId);
-                
                 if (!student) return;
 
                 if (!trimmedName) {
@@ -1244,37 +1219,30 @@
                 student.name = trimmedName;
                 this.saveData();
                 this.showToast(`已將姓名更改為 ${trimmedName}`);
-                this.render(); // 重新渲染更新畫面
+                this.render(); 
             },
 
-            // 支援從卡片或大後台發起的刪除確認
             confirmDeleteStudent(id = null) {
                 this.state.targetDeleteStudentId = id || this.state.currentStudentId;
                 this.openModal('delete-student');
             },
 
-            // 執行刪除學生
             executeDeleteStudent() {
                 const studentId = this.state.targetDeleteStudentId;
                 const studentName = this.state.students.find(s => s.id === studentId)?.name || '該學生';
                 
-                // 移除該學生
                 this.state.students = this.state.students.filter(s => s.id !== studentId);
                 
                 this.saveData();
                 this.closeModal('delete-student');
                 
-                // 如果是從卡片點進來的，關閉面板
                 if (!document.getElementById('modal-settings').classList.contains('flex')) {
                     this.closeModal('student'); 
                 } else {
-                    // 如果是在大後台，重新渲染名單
                     this.renderSettingsStudentList();
                 }
 
                 this.showToast(`已成功刪除學生：${studentName}`);
-                
-                // 重新渲染畫面 (此寫法解決了卡片消失的Bug)
                 this.render();
             },
 
@@ -1369,13 +1337,12 @@
                 filterSelect.value = currentFilter;
 
                 this.renderHistory();
-                this.render(); // 確保左側卡片與檢核表同步更新
+                this.render();
             },
 
             deleteHistoryRecord(studentId, originalIndex) {
                 const student = this.state.students.find(s => s.id === studentId);
                 if (!student || !student.history) return;
-
                 const record = student.history[originalIndex];
                 if (!record) return;
 
@@ -1580,7 +1547,6 @@
                 const head = document.getElementById('daily-grid-head');
                 const body = document.getElementById('daily-grid-body');
                 
-                // 加入隱形彈性欄位，確保前方的資料不會被無限撐寬
                 let headersHtml = `<tr>
                     <th class="py-3 px-2 text-center whitespace-nowrap text-gray-500 w-10 min-w-[40px]">號</th>
                     <th class="py-3 px-2 text-left whitespace-nowrap text-gray-500 w-24 min-w-[80px] max-w-[120px]">姓名</th>`;
@@ -1623,11 +1589,11 @@
                 this.renderSettingsStudentForm();
                 this.renderSettingsStudentList();
                 this.renderSettingsQuickButtons();
+                this.renderSettingsClassQuickButtons(); // 渲染班級專屬按鈕
                 document.getElementById('new-password').value = '';
                 this.openModal('settings');
             },
 
-            // 渲染後台學生名單 (大後台新增的功能)
             renderSettingsStudentList() {
                 const container = document.getElementById('settings-student-list');
                 container.innerHTML = '';
@@ -1657,7 +1623,6 @@
                 });
             },
 
-            // 大後台一鍵清空所有學生
             executeClearAllStudents() {
                 this.state.students = [];
                 this.saveData();
@@ -1703,8 +1668,8 @@
                 document.getElementById('new-student-number').value = '';
                 document.getElementById('new-student-name').value = '';
                 
-                this.renderSettingsStudentList(); // 立即更新後台名單
-                this.render(); // 背景也同步更新
+                this.renderSettingsStudentList();
+                this.render(); 
                 this.showToast(`已成功新增學生：${name}`);
             },
 
@@ -1788,7 +1753,7 @@
                 
                 this.renderSettingsQuickButtons();
                 this.render();
-                this.showToast('快速按鈕新增成功');
+                this.showToast('個人快速按鈕新增成功');
             },
 
             deleteQuickButton(index) {
@@ -1796,7 +1761,54 @@
                 this.saveData();
                 this.renderSettingsQuickButtons();
                 this.render();
-                this.showToast('快速按鈕已移除');
+                this.showToast('個人快速按鈕已移除');
+            },
+
+            // --- 新增：班級專屬快速按鈕管理 ---
+            renderSettingsClassQuickButtons() {
+                const container = document.getElementById('settings-class-quick-buttons-list');
+                container.innerHTML = '';
+                
+                (this.state.classQuickButtons || []).forEach((btn, index) => {
+                    const isPositive = btn.score > 0;
+                    const colorClass = isPositive ? 'bg-green-100 text-green-800 border-green-300' : 'bg-red-100 text-red-800 border-red-300';
+                    const sign = isPositive ? '+' : '';
+                    
+                    container.innerHTML += `
+                        <div class="flex items-center gap-2 ${colorClass} px-3 py-2 rounded-xl border shadow-sm">
+                            <span class="font-bold text-sm">${btn.reason} (${sign}${btn.score})</span>
+                            <button onclick="app.deleteClassQuickButton(${index})" class="text-gray-500 hover:text-red-700 ml-1"><i class="ph-bold ph-x"></i></button>
+                        </div>
+                    `;
+                });
+            },
+
+            addClassQuickButton() {
+                const reason = document.getElementById('new-class-quick-reason').value.trim();
+                const scoreStr = document.getElementById('new-class-quick-score').value;
+                const score = parseInt(scoreStr);
+
+                if (!reason) return this.showToast('請輸入事由', true);
+                if (isNaN(score) || score === 0) return this.showToast('請輸入有效分數', true);
+
+                if (!this.state.classQuickButtons) this.state.classQuickButtons = [];
+                this.state.classQuickButtons.push({ reason, score });
+                this.saveData();
+                
+                document.getElementById('new-class-quick-reason').value = '';
+                document.getElementById('new-class-quick-score').value = '';
+                
+                this.renderSettingsClassQuickButtons();
+                this.render();
+                this.showToast('班級專屬按鈕新增成功');
+            },
+
+            deleteClassQuickButton(index) {
+                this.state.classQuickButtons.splice(index, 1);
+                this.saveData();
+                this.renderSettingsClassQuickButtons();
+                this.render();
+                this.showToast('班級專屬按鈕已移除');
             },
 
             changeSystemTitle() {
@@ -1945,7 +1957,8 @@
                     groups: this.state.groups,
                     classData: this.state.classData,
                     password: this.state.password,
-                    quickButtons: this.state.quickButtons
+                    quickButtons: this.state.quickButtons,
+                    classQuickButtons: this.state.classQuickButtons
                 });
                 
                 const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
@@ -1971,6 +1984,7 @@
                             if(parsed.classData) this.state.classData = parsed.classData;
                             if(parsed.password) this.state.password = parsed.password;
                             if(parsed.quickButtons) this.state.quickButtons = parsed.quickButtons;
+                            if(parsed.classQuickButtons) this.state.classQuickButtons = parsed.classQuickButtons;
                             
                             this.saveData();
                             this.showToast('備份資料還原成功！');
@@ -1989,7 +2003,7 @@
 
             openBatchModal() {
                 if (this.state.quickButtons.length === 0) {
-                    return this.showToast('請先到設定中新增「快速評分按鈕」', true);
+                    return this.showToast('請先到設定中新增「個人/小組快速評分按鈕」', true);
                 }
                 
                 const select = document.getElementById('batch-task-select');
