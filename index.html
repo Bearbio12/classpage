@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>802積分版</title>
+    <title>燕麥熊班級經營系統</title>
     
     <!-- 引入 Tailwind CSS 進行樣式設計 -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -463,21 +463,12 @@
                             <button onclick="app.exportExcelClassList()" class="w-full flex items-center justify-center gap-2 p-3 bg-green-50 text-green-700 border-2 border-green-200 rounded-xl font-bold hover:bg-green-100 transition-colors">
                                 <i class="ph-bold ph-download-simple text-xl"></i> 下載名單與成績 (.xlsx)
                             </button>
-                            <button onclick="app.exportData()" class="w-full flex items-center justify-center gap-2 p-2 bg-blue-50 text-blue-700 border-2 border-blue-200 rounded-xl font-bold hover:bg-blue-100 transition-colors text-sm">
-                                <i class="ph-bold ph-download-simple text-lg"></i> 系統完整備份 (.json)
-                            </button>
-                            <div class="relative w-full">
-                                <button onclick="document.getElementById('import-json').click()" class="w-full h-full flex items-center justify-center gap-2 p-2 bg-orange-50 text-orange-700 border-2 border-orange-200 rounded-xl font-bold hover:bg-orange-100 transition-colors text-sm">
-                                    <i class="ph-bold ph-upload-simple text-lg"></i> 系統完整還原 (.json)
-                                </button>
-                                <input type="file" id="import-json" accept=".json" class="hidden" onchange="app.importJSON(event)">
-                            </div>
                         </div>
                     </div>
                 </section>
                 
                 <section class="bg-white p-5 rounded-2xl border-2 border-milktea shadow-sm">
-                    <h4 class="font-bold text-lg mb-4 flex items-center gap-2 border-b pb-2"><i class="ph-fill ph-lock-key text-bearlight"></i> 修改密碼</h4>
+                    <h4 class="font-bold text-lg mb-4 flex items-center gap-2 border-b pb-2"><i class="ph-fill ph-lock-key text-bearlight"></i> 修改老師密碼</h4>
                     <div class="flex gap-2">
                         <input type="password" id="new-password" placeholder="輸入新密碼" class="flex-1 p-2 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-bearlight">
                         <button onclick="app.changePassword()" class="px-4 py-2 bg-gray-800 text-white font-bold rounded-xl hover:bg-black">更新密碼</button>
@@ -555,10 +546,30 @@
         <i class="ph-bold ph-info"></i> <span id="toast-msg">訊息</span>
     </div>
 
-    <script>
+    <!-- 🔥 改用 type="module" 來引入 Firebase 模組 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+
+        // 這是您在 Firebase 申請到的專屬金鑰
+        const firebaseConfig = {
+            apiKey: "AIzaSyBnBPNkKIT5CjhGHxVGtkS9QF5eXcvmPOI",
+            authDomain: "classpage-527d3.firebaseapp.com",
+            projectId: "classpage-527d3",
+            storageBucket: "classpage-527d3.firebasestorage.app",
+            messagingSenderId: "370557708677",
+            appId: "1:370557708677:web:9891f9cbee8aa6d334bcec",
+            measurementId: "G-2KVJRQ04WY"
+        };
+
+        const firebaseApp = initializeApp(firebaseConfig);
+        const auth = getAuth(firebaseApp);
+        const db = getFirestore(firebaseApp);
+
         const DEFAULT_BEAR_SVG = `data:image/svg+xml;utf8,<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" fill="%23D4A373" /><circle cx="20" cy="20" r="15" fill="%23D4A373" /><circle cx="80" cy="20" r="15" fill="%23D4A373" /><circle cx="20" cy="20" r="8" fill="%23FAEDCD" /><circle cx="80" cy="20" r="8" fill="%23FAEDCD" /><ellipse cx="50" cy="60" rx="18" ry="15" fill="%23FAEDCD" /><ellipse cx="50" cy="55" rx="6" ry="4" fill="%235C4033" /><circle cx="35" cy="40" r="4" fill="%235C4033" /><circle cx="65" cy="40" r="4" fill="%235C4033" /><path d="M45,62 Q50,68 55,62" stroke="%235C4033" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
 
-        const app = {
+        window.app = {
             state: {
                 systemTitle: '燕麥熊班級經營',
                 students: [],
@@ -566,6 +577,7 @@
                 classData: { score: 0, history: [] },
                 mode: 'individual', 
                 password: '0000',
+                isFirebaseReady: false,
                 quickButtons: [
                     { reason: '聯絡簿確實', shortName: '聯', score: 1, hideInClass: false },
                     { reason: '打掃認真', shortName: '掃', score: 1, hideInClass: false },
@@ -584,37 +596,48 @@
             },
 
             init() {
-                this.loadData();
-                this.render();
-            },
+                // 1. 在背後幫老師匿名連上雲端資料庫
+                signInAnonymously(auth).catch((error) => {
+                    console.error("Firebase 連線提示:", error);
+                    // 即使出錯(例如沙盒環境)，也呼叫 render 確保能畫出預設介面
+                    this.render();
+                });
 
-            loadData() {
-                const data = localStorage.getItem('oatmealBearData');
-                if (data) {
-                    try {
-                        const parsed = JSON.parse(data);
-                        if (parsed.systemTitle) this.state.systemTitle = parsed.systemTitle;
-                        this.state.students = parsed.students || [];
-                        this.state.groups = parsed.groups || [];
-                        this.state.classData = parsed.classData || { score: 0, history: [] };
-                        this.state.password = parsed.password || '0000';
-                        if (parsed.quickButtons) {
-                            this.state.quickButtons = parsed.quickButtons.map(btn => ({
-                                ...btn,
-                                shortName: btn.shortName || btn.reason.substring(0, 1),
-                                hideInClass: btn.hideInClass || false
-                            }));
-                        }
-                        if (parsed.classQuickButtons) {
-                            this.state.classQuickButtons = parsed.classQuickButtons;
-                        }
-                    } catch (e) {
-                        this.showToast('讀取資料錯誤');
+                // 2. 當連線成功後，開始自動抓取並同步資料
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        this.state.isFirebaseReady = true;
+                        
+                        // 設定監聽器：只要雲端資料一有變動，就會自動下載並更新畫面
+                        const docRef = doc(db, "classes", "my-class-data");
+                        onSnapshot(docRef, (docSnap) => {
+                            if (docSnap.exists()) {
+                                const parsed = docSnap.data();
+                                if (parsed.systemTitle) this.state.systemTitle = parsed.systemTitle;
+                                this.state.students = parsed.students || [];
+                                this.state.groups = parsed.groups || [];
+                                this.state.classData = parsed.classData || { score: 0, history: [] };
+                                if (parsed.password) this.state.password = parsed.password;
+                                if (parsed.quickButtons) this.state.quickButtons = parsed.quickButtons;
+                                if (parsed.classQuickButtons) this.state.classQuickButtons = parsed.classQuickButtons;
+                                
+                                this.render(); 
+                            } else {
+                                this.render(); 
+                            }
+                        }, (error) => {
+                            console.error("讀取資料失敗", error);
+                        });
                     }
-                }
+                });
             },
 
             saveData() {
+                if (!this.state.isFirebaseReady) {
+                    this.showToast('雲端尚未連線，無法儲存資料！', true);
+                    return;
+                }
+
                 const dataToSave = {
                     systemTitle: this.state.systemTitle,
                     students: this.state.students,
@@ -624,7 +647,13 @@
                     quickButtons: this.state.quickButtons,
                     classQuickButtons: this.state.classQuickButtons
                 };
-                localStorage.setItem('oatmealBearData', JSON.stringify(dataToSave));
+                
+                // 把資料丟上 Firebase
+                const docRef = doc(db, "classes", "my-class-data");
+                setDoc(docRef, dataToSave).catch(err => {
+                    console.error("儲存失敗", err);
+                    this.showToast("儲存失敗！請確認資料庫狀態", true);
+                });
             },
 
             showToast(msg, isError = false) {
@@ -701,7 +730,6 @@
                 
                 historyRecords.forEach(r => {
                     const match = r.date.match(/^(\d{4}\/\d{2})/);
-                    // 排除當下月份，因為已經有「本月」這個選項了
                     if (match && match[1] !== currentMonthStr) {
                         months.add(match[1]);
                     }
@@ -829,7 +857,6 @@
                 if (classQuickContainer) {
                     classQuickContainer.innerHTML = '';
                     
-                    // 合併「沒被隱藏的個人/小組按鈕」與「班級專屬按鈕」
                     const activePersonalBtns = this.state.quickButtons.filter(b => !b.hideInClass);
                     const allQuickButtons = [...activePersonalBtns, ...(this.state.classQuickButtons || [])];
                     
@@ -1539,7 +1566,6 @@
                 const section = document.getElementById('daily-grid-section');
                 if (this.state.mode !== 'individual' || this.state.students.length === 0) return;
 
-                // 產生今日日期字串
                 const d = new Date();
                 const y = d.getFullYear();
                 const m = String(d.getMonth() + 1).padStart(2, '0');
@@ -1561,7 +1587,6 @@
                     headersHtml += `<th class="py-3 px-1 text-center text-sm whitespace-nowrap text-gray-500 w-10 min-w-[40px]" title="${btn.reason}">${shortName}</th>`;
                 });
                 
-                // 隱形佔位符欄位，吸收多餘空間，防止排版被拉寬
                 headersHtml += `<th class="w-full"></th></tr>`;
                 head.innerHTML = headersHtml;
 
@@ -1733,7 +1758,6 @@
                     const shortLabel = btn.shortName ? `[${btn.shortName}] ` : '';
                     const isHidden = btn.hideInClass;
 
-                    // 切換是否在班級顯示的圖示
                     const toggleIcon = isHidden ?
                         `<button onclick="app.toggleClassVisibility(${index}, false)" class="text-gray-400 hover:text-blue-500 ml-2" title="目前在班級隱藏，點擊恢復顯示"><i class="ph-bold ph-eye-slash text-lg"></i></button>` :
                         `<button onclick="app.toggleClassVisibility(${index}, true)" class="text-blue-500 hover:text-gray-400 ml-2" title="目前在班級顯示，點擊可隱藏"><i class="ph-bold ph-eye text-lg"></i></button>`;
@@ -1794,9 +1818,8 @@
                 const container = document.getElementById('settings-class-quick-buttons-list');
                 container.innerHTML = '';
                 
-                // 1. 渲染沒有被隱藏的個人連動按鈕
                 this.state.quickButtons.forEach((btn, index) => {
-                    if (btn.hideInClass) return; // 略過已隱藏的
+                    if (btn.hideInClass) return; 
 
                     const isPositive = btn.score > 0;
                     const colorClass = isPositive ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200';
@@ -1813,7 +1836,6 @@
                     `;
                 });
 
-                // 2. 渲染班級專屬大按鈕
                 (this.state.classQuickButtons || []).forEach((btn, index) => {
                     const isPositive = btn.score > 0;
                     const colorClass = isPositive ? 'bg-green-100 text-green-800 border-green-400' : 'bg-red-100 text-red-800 border-red-400';
@@ -1996,61 +2018,6 @@
                 XLSX.writeFile(workbook, fileName);
             },
 
-            exportData() {
-                const dataStr = JSON.stringify({
-                    students: this.state.students,
-                    groups: this.state.groups,
-                    classData: this.state.classData,
-                    password: this.state.password,
-                    quickButtons: this.state.quickButtons,
-                    classQuickButtons: this.state.classQuickButtons
-                });
-                
-                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-                const exportFileDefaultName = `燕麥熊班級資料備份_${new Date().toLocaleDateString('zh-TW').replace(/\//g, '')}.json`;
-                
-                const linkElement = document.createElement('a');
-                linkElement.setAttribute('href', dataUri);
-                linkElement.setAttribute('download', exportFileDefaultName);
-                linkElement.click();
-            },
-
-            importJSON(event) {
-                const file = event.target.files[0];
-                if (!file) return;
-
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    try {
-                        const parsed = JSON.parse(e.target.result);
-                        if (parsed.students && parsed.groups) {
-                            this.state.students = parsed.students;
-                            this.state.groups = parsed.groups;
-                            if(parsed.classData) this.state.classData = parsed.classData;
-                            if(parsed.password) this.state.password = parsed.password;
-                            if(parsed.quickButtons) this.state.quickButtons = parsed.quickButtons;
-                            if(parsed.classQuickButtons) this.state.classQuickButtons = parsed.classQuickButtons;
-                            
-                            // 確保隱藏標記存在
-                            this.state.quickButtons.forEach(b => {
-                                if (b.hideInClass === undefined) b.hideInClass = false;
-                            });
-                            
-                            this.saveData();
-                            this.showToast('備份資料還原成功！');
-                            this.closeModal('settings');
-                            this.render();
-                        } else {
-                            this.showToast('檔案格式不正確', true);
-                        }
-                    } catch (err) {
-                        this.showToast('讀取檔案失敗', true);
-                    }
-                    event.target.value = '';
-                };
-                reader.readAsText(file);
-            },
-
             openBatchModal() {
                 if (this.state.quickButtons.length === 0) {
                     return this.showToast('請先到設定中新增「個人/小組快速評分按鈕」', true);
@@ -2189,10 +2156,8 @@
             }
         };
 
-        window.onload = () => {
-            app.init();
-        };
-
+        // 啟動系統
+        window.app.init();
     </script>
 </body>
 </html>
