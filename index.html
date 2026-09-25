@@ -225,12 +225,13 @@
             
             <div class="flex flex-col md:flex-row flex-1 overflow-y-auto">
                 <div class="w-full md:w-1/3 p-4 md:p-6 border-b-2 md:border-b-0 md:border-r-2 border-milktea bg-oatmeal/50 flex flex-col items-center">
-                    <div id="student-modal-avatar-wrapper" class="relative mb-4 group" onclick="if(app.state.isStudentEditUnlocked) document.getElementById('upload-avatar').click()">
+                    <!-- 🔥 已替換為網址版頭像區塊 -->
+                    <div id="student-modal-avatar-wrapper" class="relative mb-4 group cursor-pointer" onclick="if(app.state.isStudentEditUnlocked) app.handleAvatarUpload()">
                         <img id="student-modal-avatar" src="" class="w-36 h-36 rounded-3xl border-4 border-white shadow-md object-cover bg-accent">
-                        <div id="avatar-upload-overlay" class="absolute inset-0 bg-black/40 rounded-3xl hidden items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <i class="ph-bold ph-camera text-white text-3xl"></i>
+                        <div id="avatar-upload-overlay" class="absolute inset-0 bg-black/40 rounded-3xl hidden flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <i class="ph-bold ph-link text-white text-3xl"></i>
+                            <span class="text-white text-sm font-bold mt-1">貼上網址</span>
                         </div>
-                        <input type="file" id="upload-avatar" accept="image/*" class="hidden" onchange="app.handleAvatarUpload(event)" disabled>
                     </div>
                     <div class="text-center mb-6 w-full px-2">
                         <span id="student-modal-number" class="text-sm font-bold text-gray-500 bg-white px-2 py-1 rounded-lg border border-gray-200 mb-1 inline-block"></span>
@@ -1196,7 +1197,7 @@
                 
                 const avatarWrapper = document.getElementById('student-modal-avatar-wrapper');
                 const avatarOverlay = document.getElementById('avatar-upload-overlay');
-                const avatarInput = document.getElementById('upload-avatar');
+                
                 const nameInput = document.getElementById('student-modal-name-input');
                 const deleteBtn = document.getElementById('btn-delete-student');
                 
@@ -1204,7 +1205,7 @@
                     avatarWrapper.classList.add('cursor-pointer');
                     avatarOverlay.classList.remove('hidden');
                     avatarOverlay.classList.add('flex');
-                    avatarInput.disabled = false;
+                    
                     document.getElementById('student-modal-group').disabled = false;
                     
                     nameInput.disabled = false;
@@ -1219,7 +1220,7 @@
                     avatarWrapper.classList.remove('cursor-pointer');
                     avatarOverlay.classList.add('hidden');
                     avatarOverlay.classList.remove('flex');
-                    avatarInput.disabled = true;
+                    
                     document.getElementById('student-modal-group').disabled = true;
                     
                     nameInput.disabled = true;
@@ -1544,22 +1545,26 @@
                 }
             },
 
-            handleAvatarUpload(event) {
-                const file = event.target.files[0];
-                if (!file) return;
-
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const student = this.state.students.find(s => s.id === this.state.currentStudentId);
-                    if (student) {
-                        student.avatar = e.target.result;
-                        document.getElementById('student-modal-avatar').src = student.avatar;
-                        this.saveData();
-                        this.showToast('照片上傳成功！');
-                        this.render();
+            handleAvatarUpload() {
+                const url = prompt("請貼上學生照片的網址 (結尾通常為 .jpg 或 .png)：\n\n(💡 若要清除照片恢復預設燕麥熊，請直接清空內容並按確定)");
+                
+                if (url === null) return; // 按下取消
+                
+                const student = this.state.students.find(s => s.id === this.state.currentStudentId);
+                if (student) {
+                    student.avatar = url.trim();
+                    
+                    const imgElement = document.getElementById('student-modal-avatar');
+                    if(student.avatar) {
+                        imgElement.src = student.avatar;
+                    } else {
+                        imgElement.removeAttribute('src'); 
                     }
-                };
-                reader.readAsDataURL(file);
+                    
+                    this.saveData();
+                    this.showToast(student.avatar ? '照片網址設定成功！' : '已清除照片！');
+                    this.render();
+                }
             },
 
             renderDailyGrid() {
