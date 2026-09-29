@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>燕麥熊班級經營系統</title>
+    <title>802積分版</title>
     
     <!-- 引入 Tailwind CSS 進行樣式設計 -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -375,7 +375,7 @@
         </div>
     </div>
     
-    <!-- 🔥 新增：刪除所有資料 (原廠設定) 確認模態框 -->
+    <!-- 刪除所有資料 (原廠設定) 確認模態框 -->
     <div id="modal-factory-reset" class="fixed inset-0 bg-bearbrown/40 backdrop-blur-sm hidden items-center justify-center z-50 modal-overlay p-4">
         <div class="bg-white p-6 md:p-8 rounded-3xl shadow-xl border-4 border-red-200 max-w-sm w-full modal-content text-center">
             <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -488,7 +488,6 @@
                                 </button>
                                 <input type="file" id="import-json" accept=".json" class="hidden" onchange="app.importJSON(event)">
                             </div>
-                            <!-- 🔥 加回來的清除所有資料按鈕 -->
                             <div class="text-right mt-1">
                                 <button onclick="app.requireAuth(() => app.confirmFactoryReset())" class="text-red-500 font-bold text-sm underline hover:text-red-700 transition-colors">
                                     清除所有資料 (需再次輸入密碼)
@@ -577,7 +576,7 @@
         <i class="ph-bold ph-info"></i> <span id="toast-msg">訊息</span>
     </div>
 
-    <!-- 🔥 改用 type="module" 來引入 Firebase 模組 -->
+    <!-- 改用 type="module" 來引入 Firebase 模組 -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
@@ -1701,7 +1700,6 @@
                 this.render();
             },
 
-            // 🔥 新增：執行恢復原廠設定的動作
             confirmFactoryReset() {
                 this.openModal('factory-reset');
             },
